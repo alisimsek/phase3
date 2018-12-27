@@ -1,0 +1,26 @@
+<h3>Main Page</h3>
+<h2>Create Image</h2>
+<form action = "/create_image/" method='POST'> {% csrf_token %}
+    Image name: <input type="text" name="image_name"><br>
+    <input type='submit' value='Create image'>
+</form>
+<h2>Load Image</h2>
+<form action = "/load_image/" method='POST'> {% csrf_token %}
+    Image name: <input type="text" name="image_name"><br>
+    Image path: <input type="text" name="image_path"><br>
+    <input type='submit' value='Create image'>
+</form>
+<h2>Add Rule</h2>
+<form action = "/add_rule/" method='POST'> {% csrf_token %}
+    Image name: <input type="text" name="image_name"><br>
+    Username: <input type="text" name="username"><br>
+    Shape:    <input type="text" name="shape"><br>
+    Action:   <input type="text" name="action"><br>
+    Rule Position: <input type="text" name="rule_pos"><br>
+    <input type='submit' value='Add Rule'>
+</form>
+<h2>Get Image</h2>
+<form action='/get_image/' method='POST'> {% csrf_token %}
+    Image name: <input type="text" name="image_name"><br>
+    <input type='submit' value='Get Image'>
+</form>
