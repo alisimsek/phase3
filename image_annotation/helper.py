@@ -1,6 +1,8 @@
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
+from django.contrib.auth.models import User
 import math
+import re
 
 def insideRectangle(x,y,rect):
     if (x >= rect[1] and x <= rect[3]) or (x <= rect[1] and x >= rect[3]):
@@ -26,10 +28,9 @@ def insidePolyline(x,y,polyline):
     return polygon.contains(point)
 
 def matchGroup(user,rule):
-    u = UserGroup()
-    userGroups = u.getGroups(user)
+    userGroups = user.groups.all()
     for group in userGroups:
-        if re.fullmatch(rule[0],group):
+        if re.fullmatch(rule[0],group.name):
             return True
 
     return False

@@ -1,0 +1,16 @@
+<h2>Create new image</h2>
+<form action = "/create_image/" method='POST'> {% csrf_token %}
+    Image name: <input type="text" name="image_name" required><br>
+    <input type='submit' value='Create image'>
+</form>
+<br><br>
+<u1>
+  <h2>Select image</h2>
+  {% for item in imList %}
+  <form action = "/get_image/" method='POST'> {% csrf_token %}
+    <input type='hidden' name='username' value={{ item.username }}>
+    <input type='hidden' name='image_name' value={{ item.imagename }}>
+    <h3>Owner: {{item.username}}</h3> <input type='submit' value={{ item.imagename }}><br>
+  </form>
+  {% endfor %}
+</u1>

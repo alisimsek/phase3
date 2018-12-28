@@ -1,26 +1,38 @@
 <h3>Main Page</h3>
-<h2>Create Image</h2>
-<form action = "/create_image/" method='POST'> {% csrf_token %}
-    Image name: <input type="text" name="image_name"><br>
-    <input type='submit' value='Create image'>
+<form action="/main_page" class="inline">
+  <button>Home</button>
 </form>
 <h2>Load Image</h2>
 <form action = "/load_image/" method='POST'> {% csrf_token %}
-    Image name: <input type="text" name="image_name"><br>
-    Image path: <input type="text" name="image_path"><br>
-    <input type='submit' value='Create image'>
+    Image path: <input type="text" name="image_path" required><br>
+    <input type="hidden" name="image_name" value={{ image_name }}><br>
+    <input type='submit' value='Load image'>
 </form>
 <h2>Add Rule</h2>
 <form action = "/add_rule/" method='POST'> {% csrf_token %}
-    Image name: <input type="text" name="image_name"><br>
-    Username: <input type="text" name="username"><br>
-    Shape:    <input type="text" name="shape"><br>
-    Action:   <input type="text" name="action"><br>
-    Rule Position: <input type="text" name="rule_pos"><br>
+    <input type="hidden" name="image_name" value={{ image_name }}><br>
+    Username: <input type="text" name="username" required><br>
+    Shape:    <input type="text" name="shape" required><br>
+    Action:   <input type="text" name="action" required><br>
+    Rule Position: <input type="number" step="1" name="rule_pos"><br>
     <input type='submit' value='Add Rule'>
 </form>
+<h2>Set default action</h2>
+<form action='/set_default/' method='POST'> {% csrf_token %}
+    <input type="hidden" name="image_name" value={{ image_name }}>
+    <input type='submit' name="action"  value='ALLOW'>
+    <input type='submit' name="action"  value='BLUR'>
+    <input type='submit' name="action"  value='DENY'><br>
+</form>
+<h2>Del Rule</h2>
+<form action='/del_rule/' method='POST'> {% csrf_token %}
+    <input type="hidden" name="image_name" value={{ image_name }}><br>
+    Rule Position: <input type="number" step="1" name="rule_pos" required><br>
+    <input type='submit' value='Del Rule'>
+</form>
 <h2>Get Image</h2>
-<form action='/get_image/' method='POST'> {% csrf_token %}
-    Image name: <input type="text" name="image_name"><br>
+<form action='/get_owner_image/' method='POST'> {% csrf_token %}
+    <h3>Please load an image if you haven't done it before</h3>
+    <input type="hidden" name="image_name" value={{ image_name }}><br>
     <input type='submit' value='Get Image'>
 </form>

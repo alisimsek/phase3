@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <body>
-
-<h2>HTML Image</h2>
-{% load static %}
-<img src= "saved.png" alt="Girl in a jacket" width="500" height="600">
-
+  <form action="/main_page" class="inline">
+    <button>Home</button>
+  </form>
+  {% load static %}
+  <img src="{% static "/images/" %}{{ username }}.png" alt="My image"  width={{ w }} height={{ h }}>
 </body>
 </html>

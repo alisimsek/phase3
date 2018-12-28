@@ -16,4 +16,7 @@ urlpatterns = [
     path('load_image/', views.load_image, name='load_image'),
     path('add_rule/', views.add_rule, name='add_rule'),
     path('get_image/', views.get_image, name='get_image'),
+    path('get_owner_image/', views.get_owner_image, name='get_owner_image'),
+    path('set_default/', views.set_default, name='set_default'),
+    path('del_rule/', views.del_rule, name='del_rule'),
 ]
