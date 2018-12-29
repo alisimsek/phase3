@@ -4,7 +4,7 @@ from django.views.generic import View
 from django.contrib.auth.models import User, Group
 from django.conf import settings
 from PIL import Image
-from .forms import  UserForm
+from .forms import  UserForm, ImageUploadForm
 from .models import *
 from .image_list import *
 import ast
@@ -26,13 +26,15 @@ def create_image(request):
         return render(request, 'image_annotation/main_page.html', {"image_name" : image_name})
 
 def load_image(request):
-    if request.method == "POST":
-        image_name = request.POST['image_name']
-        path = request.POST['image_path']
-        image = LabeledImage.objects.get(name=image_name)
-        image.loadImage(path)
-        image.save()
-        return render(request, 'image_annotation/main_page.html', {"image_name" : image_name})
+    if request.method == 'POST':
+        form = ImageUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            image_name = request.POST['image_name']
+            img = LabeledImage.objects.get(name=image_name)
+            img.image = form.cleaned_data['image']
+            img.save()
+            return render(request, 'image_annotation/main_page.html', {"image_name" : image_name})
+
 
 def add_rule(request):
     if request.method == "POST":
@@ -89,7 +91,6 @@ def set_default(request):
         image = LabeledImage.objects.get(name=image_name)
         if request.user.username == image.owner.username:
             image.action = request.POST['action']
-            print(image.action)
             image.save()
             return render(request, 'image_annotation/main_page.html',{"image_name" : image_name})
         else:
@@ -204,6 +205,7 @@ def is_member(request):
 def log_out(request):
     logout(request)
     return redirect('/')
+
 
 class UserRegister(View):
     form_class = UserForm

@@ -8,3 +8,6 @@ class UserForm(forms.ModelForm):
         model = User
         help_texts = {'username':None,}
         fields = ['username', 'password']
+
+class ImageUploadForm(forms.Form):
+    image = forms.ImageField()

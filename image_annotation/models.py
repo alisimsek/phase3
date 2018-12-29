@@ -24,7 +24,7 @@ class MyUser(models.Model):
 
 class LabeledImage(models.Model):
     name = models.CharField(max_length=50, unique=True)
-    image = models.BinaryField()
+    image = models.ImageField(upload_to = 'static/uploaded_images/')
     action = models.CharField(max_length=10) # ALLOW, DENY, BLUR
     ruleList = models.CharField(max_length=5000) # can be a lot of rules
     owner = models.ForeignKey(User, null = False, on_delete=models.CASCADE) # Every image has one owner
@@ -86,7 +86,7 @@ class LabeledImage(models.Model):
 
         user = User.objects.get(username=user)
 
-        im = Image.open(io.BytesIO(self.image))
+        im = Image.open(self.image)
         width,height = im.size
 
         if self.ruleList == '':
