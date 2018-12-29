@@ -19,4 +19,13 @@ urlpatterns = [
     path('get_owner_image/', views.get_owner_image, name='get_owner_image'),
     path('set_default/', views.set_default, name='set_default'),
     path('del_rule/', views.del_rule, name='del_rule'),
+    path('usergroups/', views.usergroups, name='usergroups'),
+    path('add_user/', views.add_user, name='add_user'),
+    path('add_group/', views.add_group, name='add_group'),
+    path('del_user/', views.del_user, name='del_user'),
+    path('del_group/', views.del_group, name='del_group'),
+    path('get_groups/', views.get_groups, name='get_groups'),
+    path('get_users/', views.get_users, name='get_users'),
+    path('set_password/', views.set_password, name='set_password'),
+    path('is_member/', views.is_member, name='is_member'),
 ]

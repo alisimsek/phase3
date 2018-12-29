@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.views.generic import View
+from django.contrib.auth.models import User, Group
 from django.conf import settings
 from PIL import Image
 from .forms import  UserForm
 from .models import *
 from .image_list import *
-import io, base64
+import ast
 
 # Create your views here.
 def home_page(request):
@@ -88,6 +89,7 @@ def set_default(request):
         image = LabeledImage.objects.get(name=image_name)
         if request.user.username == image.owner.username:
             image.action = request.POST['action']
+            print(image.action)
             image.save()
             return render(request, 'image_annotation/main_page.html',{"image_name" : image_name})
         else:
@@ -105,7 +107,99 @@ def del_rule(request):
         else:
             return render(request, 'image_annotation/not_authorized.html',{"image_name" : image_name})
 
+def usergroups(request):
+    if request.method == "POST":
+        if request.user.is_superuser:
+            return render(request, "image_annotation/superuser.html")
+        else :
+            return render(request, "image_annotation/user_groups.html")
 
+def add_user(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        groups = request.POST['groups']
+        password = request.POST['password']
+
+        usr = User(username=username, password=password)
+        usr.save()
+
+        groups = ast.literal_eval(groups)
+        for group in groups:
+            try:
+                Group.objects.get(name=group)
+            except:
+                Group.objects.create(name=group)
+            gr = Group.objects.get(name=group)
+            gr.user_set.add(usr)
+
+        return render(request, "image_annotation/superuser.html")
+
+def add_group(request):
+    if request.method == "POST":
+        groupname = request.POST['groupname']
+        try:
+            Group.objects.get(name=groupname)
+        except:
+            Group.objects.create(name=groupname)
+
+        return render(request, "image_annotation/superuser.html")
+
+def del_user(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        try:
+            User.objects.get(username=username).delete()
+        except:
+            pass
+
+        return render(request, "image_annotation/superuser.html")
+
+def del_group(request):
+    if request.method == "POST":
+        groupname = request.POST['groupname']
+        try:
+            Group.objects.get(name=groupname).delete()
+        except:
+            pass
+
+        return render(request, "image_annotation/superuser.html")
+
+def get_groups(request):
+    if request.method == "POST":
+        groups = list(request.user.groups.all())
+        return render(request, "image_annotation/show_groups.html", {"groups" : groups})
+
+def get_users(request):
+    if request.method == "POST":
+        groupname = request.POST['groupname']
+        group = Group.objects.get(name=groupname)
+        users = list(group.user_set.all())
+        return render(request, "image_annotation/show_users.html", {"users" : users})
+def set_password(request):
+    if request.method == "POST":
+        if request.user.is_superuser:
+            username = request.POST['username']
+        else:
+            username = request.user.username
+        password = request.POST['password']
+
+        usr = User.objects.get(username=username)
+        usr.set_password(password)
+        usr.save()
+
+        if request.user.is_superuser:
+            return render(request, "image_annotation/superuser.html")
+        else:
+            return render(request, "image_annotation/user_groups.html")
+
+def is_member(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        groupname = request.POST['groupname']
+
+        usr = User.objects.get(username=username)
+        val = usr.groups.filter(name=groupname).exists()
+        return render(request, "image_annotation/is_member.html", {"val":val})
 
 
 class UserRegister(View):

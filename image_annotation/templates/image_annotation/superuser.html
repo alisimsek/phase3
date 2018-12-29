@@ -1,0 +1,43 @@
+<h2>Add User</h2>
+<form action = "/add_user/" method='POST'> {% csrf_token %}
+    Username :<input type="text" name="username" required><br>
+    Groups :<input type="text" name="groups" required><br>
+    Password :<input type="text" name="password" required><br>
+    <input type='submit' value='Add User'>
+</form>
+<h2>Add Group</h2>
+<form action = "/add_group/" method='POST'> {% csrf_token %}
+    Groupname :<input type="text" name="groupname" required><br>
+    <input type='submit' value='Add Group'>
+</form>
+<h2>Delete User</h2>
+<form action = "/del_user/" method='POST'> {% csrf_token %}
+    Username :<input type="text" name="username" required><br>
+    <input type='submit' value='Del User'>
+</form>
+<h2>Delete Group</h2>
+<form action = "/del_group/" method='POST'> {% csrf_token %}
+    Groupname :<input type="text" name="groupname" required><br>
+    <input type='submit' value='Del Group'>
+</form>
+<h2>Get Groups</h2>
+<form action = "/get_groups/" method='POST'> {% csrf_token %}
+    <input type='submit' value='Get Groups'>
+</form>
+<h2>Get Users</h2>
+<form action = "/get_users/" method='POST'> {% csrf_token %}
+    Groupname : <input type="text" name="groupname" required><br>
+    <input type='submit' value='Get Users'>
+</form>
+<h2>Set Password</h2>
+<form action = "/set_password/" method='POST'> {% csrf_token %}
+    Username : <input type="text" name="username" required><br>
+    Password :<input type="text" name="password" required><br>
+    <input type='submit' value='Set password'>
+</form>
+<h2>Is Member</h2>
+<form action = "/is_member/" method='POST'> {% csrf_token %}
+    Username : <input type="text" name="username" required><br>
+    Groupname :<input type="text" name="groupname" required><br>
+    <input type='submit' value='Is member'>
+</form>

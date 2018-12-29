@@ -1,0 +1,9 @@
+<u1>
+  <h2>User groups</h2>
+  {% for group in groups %}
+    <h2>{{ group.name }}</h2>
+  {% endfor %}
+  <form action = "/usergroups/" method='POST'> {% csrf_token %}
+    <input type='submit' value="Back"><br>
+  </form>
+</u1>

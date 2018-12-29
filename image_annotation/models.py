@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from PIL import Image
+from PIL import Image, ImageFilter
 import ast
 import io
 import re
@@ -90,9 +90,13 @@ class LabeledImage(models.Model):
         width,height = im.size
 
         if self.ruleList == '':
-            return im
+            if self.action == 'ALLOW':
+                return im
+            rules = []
         else:
             rules = ast.literal_eval(self.ruleList)  #Convert string back to list
+
+        blurred_image =  im.filter(ImageFilter.BLUR)
 
         for w in range(width):
             for h in range(height):
@@ -103,6 +107,8 @@ class LabeledImage(models.Model):
                             action = rule[2]
                             if action.upper() == "DENY":
                                 im.putpixel( (w,h), (0,0,0))
+                            elif action.upper() == "BLUR":
+                                im.putpixel( (w,h), blurred_image.getpixel((w,h)))
                             matchFound = True
                             break;
 
@@ -111,6 +117,8 @@ class LabeledImage(models.Model):
                             action = rule[2]
                             if action.upper() == "DENY":
                                 im.putpixel( (w,h), (0,0,0))
+                            elif action.upper() == "BLUR":
+                                im.putpixel( (w,h), blurred_image.getpixel((w,h)))
                             matchFound = True
                             break;
 
@@ -119,10 +127,14 @@ class LabeledImage(models.Model):
                             action = rule[2]
                             if action.upper() == "DENY":
                                 im.putpixel( (w,h), (0,0,0))
+                            elif action.upper() == "BLUR":
+                                im.putpixel( (w,h), blurred_image.getpixel((w,h)))
                             matchFound = True
                             break;
                 if not matchFound: #Apply defaultAction if none of the rules match
                     if self.action.upper() == "DENY":
                         im.putpixel( (w,h), (0,0,0))
+                    elif self.action.upper() == "BLUR":
+                        im.putpixel( (w,h), blurred_image.getpixel((w,h)))
 
         return im

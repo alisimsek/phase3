@@ -4,6 +4,12 @@
     <input type='submit' value='Create image'>
 </form>
 <br><br>
+<h2>UserGroups</h2>
+<form action = "/usergroups/" method='POST'> {% csrf_token %}
+    <input type='submit' value='UserGroup operations'>
+</form>
+<br><br>
+
 <u1>
   <h2>Select image</h2>
   {% for item in imList %}
