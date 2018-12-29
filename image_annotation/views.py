@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.views.generic import View
 from django.contrib.auth.models import User, Group
 from django.conf import settings
@@ -201,6 +201,9 @@ def is_member(request):
         val = usr.groups.filter(name=groupname).exists()
         return render(request, "image_annotation/is_member.html", {"val":val})
 
+def log_out(request):
+    logout(request)
+    return redirect('/')
 
 class UserRegister(View):
     form_class = UserForm

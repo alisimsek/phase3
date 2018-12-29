@@ -1,3 +1,6 @@
+<form action="/log_out" class="inline">
+  <button>Log out</button>
+</form>
 <h2>Create new image</h2>
 <form action = "/create_image/" method='POST'> {% csrf_token %}
     Image name: <input type="text" name="image_name" required><br>

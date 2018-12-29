@@ -28,4 +28,5 @@ urlpatterns = [
     path('get_users/', views.get_users, name='get_users'),
     path('set_password/', views.set_password, name='set_password'),
     path('is_member/', views.is_member, name='is_member'),
+    path('log_out/', views.log_out, name='log_out'),
 ]
