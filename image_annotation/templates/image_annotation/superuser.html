@@ -25,6 +25,7 @@
 </form>
 <h2>Get Groups</h2>
 <form action = "/get_groups/" method='POST'> {% csrf_token %}
+    Username : <input type="text" name="username" required><br>
     <input type='submit' value='Get Groups'>
 </form>
 <h2>Get Users</h2>

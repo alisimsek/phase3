@@ -121,7 +121,8 @@ def add_user(request):
         groups = request.POST['groups']
         password = request.POST['password']
 
-        usr = User(username=username, password=password)
+        usr = User(username=username)
+        usr.set_password(password)
         usr.save()
 
         groups = ast.literal_eval(groups)
@@ -167,7 +168,9 @@ def del_group(request):
 
 def get_groups(request):
     if request.method == "POST":
-        groups = list(request.user.groups.all())
+        username = request.POST['username']
+        usr = User.objects.get(username=username)
+        groups = list(usr.groups.all())
         return render(request, "image_annotation/show_groups.html", {"groups" : groups})
 
 def get_users(request):

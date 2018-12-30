@@ -1,0 +1,13 @@
+admin
+admin123
+UserGroup.addUser("ali", ["group1","group2"],"12345")
+UserGroup.addUser("veli", ["group1","group3"],"54321")
+UserGroup.addUser("kemal", ["group1"],"kemal123")
+UserGroup.addGroup("group4")
+UserGroup.delUser("kemal")
+UserGroup.delGroup("group4")
+UserGroup.getGroups("ali")
+UserGroup.getUsers("group1")
+UserGroup.setPassword("admin","admin123")
+UserGroup.isMember("ali","group1")
+exit

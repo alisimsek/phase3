@@ -1,0 +1,15 @@
+signin
+ali
+ali123
+LabeledImage()
+loadImage("stone.jpg")
+addRule("veli",("CIRCLE",200,200,50),"DENY")
+addRule("^[a-z]{4}$",("RECTANGLE",100,100,200,200),"DENY")
+addRule("ali",("CIRCLE",250,250,50),"DENY")
+addRule("group3",("POLYLINE",[(25,25),(25,50),(50,50)]),"DENY")
+addRule("kamuran",("CIRCLE", 250,250,30), "DENY", 1)
+delRule(1)
+setDefault("ALLOW")
+save("myimage")
+getImage()
+exit
