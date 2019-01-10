@@ -5,12 +5,12 @@
       body {
         background-color: powderblue;
       }
-      l1 {
+      ul.l1 {
         position: fixed;
         left: 500px;
         top: 0px;
       }
-      l2 {
+      ul.l2 {
         position: fixed;
         left: 700px;
         top: 0px;
@@ -18,67 +18,203 @@
     </style>
   </head>
 <body>
-  <l1>
-    <h2>User List</h2>
-    {% for user in users %}
-      <li>{{  user.username  }}</li>
-    {% endfor %}
-  </l1>
-  <l2>
-    <h2>Group List</h2>
-    {% for group in groups %}
-      <li>{{  group.name  }}</li>
-    {% endfor %}
-  </l2>
-  <form action="/main_page" class="inline">
-    <button>Home</button>
-  </form>
-  <div id="header">
-    <span class="right_header">Call now</span>
+  <div>
+    <ul class="l1" id="user_list">
+      <h2>User List</h2>
+      {% for user in users %}
+        <li class={{ user.username }}>{{  user.username  }}</li>
+      {% endfor %}
+    </ul>
   </div>
-  <h2>Add User</h2>
-  <form action = "/add_user/" method='POST'> {% csrf_token %}
-      Username :<input type="text" name="username" required><br>
-      Groups :<input type="text" name="groups" required><br>
-      Password :<input type="text" name="password" required><br>
+  <div>
+    <ul class="l2" id="group_list">
+      <h2>Group List</h2>
+      {% for group in groups %}
+        <li class={{ group.name }}>{{  group.name  }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div>
+    <form action="/main_page" class="inline">
+      <button>Home</button>
+    </form>
+  </div>
+  <div>
+    <h2>Add User</h2>
+    <form id="add_user_form"> {% csrf_token %}
+      Username :<input type="text" name="username" id=usrname required><br>
+      Groups :<input type="text" name="groups" id=grps required><br>
+      Password :<input type="text" name="password" id=pwd required><br>
       <input type='submit' value='Add User'>
-  </form>
-  <h2>Add Group</h2>
-  <form action = "/add_group/" method='POST'> {% csrf_token %}
-      Groupname :<input type="text" name="groupname" required><br>
-      <input type='submit' value='Add Group'>
-  </form>
-  <h2>Delete User</h2>
-  <form action = "/del_user/" method='POST'> {% csrf_token %}
-      Username :<input type="text" name="username" required><br>
+    </form>
+  </div>
+  <div>
+    <h2>Add Group</h2>
+    <form id="add_group_form"> {% csrf_token %}
+        Groupname :<input type="text" name="groupname" id="grpname" required><br>
+        <input type='submit' value='Add Group'>
+    </form>
+  </div>
+  <div>
+    <h2>Delete User</h2>
+    <form id="del_user"> {% csrf_token %}
+      Username :<input type="text" name="username" id="uname" required><br>
       <input type='submit' value='Del User'>
-  </form>
-  <h2>Delete Group</h2>
-  <form action = "/del_group/" method='POST'> {% csrf_token %}
-      Groupname :<input type="text" name="groupname" required><br>
+    </form>
+  </div>
+  <div>
+    <h2>Delete Group</h2>
+    <form id="del_group"> {% csrf_token %}
+      Groupname :<input type="text" name="groupname" id="grname" required><br>
       <input type='submit' value='Del Group'>
-  </form>
-  <h2>Get Groups</h2>
-  <form action = "/get_groups/" method='POST'> {% csrf_token %}
+    </form>
+  </div>
+  <div>
+    <h2>Get Groups</h2>
+    <form action = "/get_groups/" method='POST'> {% csrf_token %}
       Username : <input type="text" name="username" required><br>
       <input type='submit' value='Get Groups'>
-  </form>
-  <h2>Get Users</h2>
-  <form action = "/get_users/" method='POST'> {% csrf_token %}
+    </form>
+  </div>
+  <div>
+    <h2>Get Users</h2>
+    <form action = "/get_users/" method='POST'> {% csrf_token %}
       Groupname : <input type="text" name="groupname" required><br>
       <input type='submit' value='Get Users'>
-  </form>
-  <h2>Set Password</h2>
-  <form action = "/set_password/" method='POST'> {% csrf_token %}
+    </form>
+  </div>
+  <div>
+    <h2>Set Password</h2>
+    <form action = "/set_password/" method='POST'> {% csrf_token %}
       Username : <input type="text" name="username" required><br>
       Password :<input type="text" name="password" required><br>
       <input type='submit' value='Set password'>
-  </form>
-  <h2>Is Member</h2>
-  <form action = "/is_member/" method='POST'> {% csrf_token %}
+    </form>
+  </div>
+  <div>
+    <h2>Is Member</h2>
+    <form action = "/is_member/" method='POST'> {% csrf_token %}
       Username : <input type="text" name="username" required><br>
       Groupname :<input type="text" name="groupname" required><br>
       <input type='submit' value='Is member'>
-  </form>
+    </form>
+  </div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script type="text/javascript">
+  $(document).on('submit','#add_group_form', function(e){
+    e.preventDefault();
+
+    $.ajax({
+      type:'POST',
+      url:'/add_group/',
+      data: {
+        groupname:$('#grpname').val(),
+        csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+      },
+      success:function(){
+          var group_list = document.getElementById("group_list")
+          var list_item = document.createElement("LI")
+          list_item.innerHTML = $('#grpname').val()
+          group_list.appendChild(list_item)
+          alert("New group added!");
+      }
+    });
+  });
+</script>
+
+<script> // add user
+$(document).on('submit','#add_user_form', function(e){
+  e.preventDefault();
+
+  $.ajax({
+    type:'POST',
+    url:'/add_user/',
+    data: {
+      username:$('#usrname').val(),
+      groups:$('#grps').val(),
+      password:$('#pwd').val(),
+      csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+    },
+    success:function(){
+        var user_list = document.getElementById("user_list")
+        var group_list = document.getElementById("group_list")
+        var list_item = document.createElement("LI")
+        list_item.innerHTML = $('#usrname').val()
+        user_list.appendChild(list_item)
+
+        // add newly added groups aswell
+        var start_point, end_point, start_found = false;
+        var groups = $('#grps').val();
+        var i = 1;
+        var parsed_groups = []
+        while(groups[i] != ']' ) { // parse groups in the string
+          if(groups[i] == '\'' && start_found == false) {
+            start_found = true
+            start_point = i+1
+          } else if(groups[i] == '\'' && start_found == true){
+            start_found = false
+            end_point = i
+            var group = groups.substring(start_point, end_point);
+            parsed_groups.push(group);
+          }
+          i++;
+        }
+
+        for(var item in parsed_groups) {
+          if (! $('#group_list li:contains(' + parsed_groups[item]+ ')').length ) {
+              var group_list_item = document.createElement("LI")
+              group_list_item.innerHTML = parsed_groups[item]
+              group_list.appendChild(group_list_item)
+          }
+        }
+
+        alert("New user added!");
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+  $(document).on('submit','#del_group', function(e){
+    e.preventDefault();
+
+    $.ajax({
+      type:'POST',
+      url:'/del_group/',
+      data: {
+        groupname:$('#grname').val(),
+        csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+      },
+      success:function(){
+          var classname = $('#grname').val();
+          $("#group_list li").remove('.' + classname)
+          alert("Deleted group!");
+      }
+    });
+  });
+</script>
+
+<script type="text/javascript">
+  $(document).on('submit','#del_user', function(e){
+    e.preventDefault();
+
+    $.ajax({
+      type:'POST',
+      url:'/del_user/',
+      data: {
+        username:$('#uname').val(),
+        csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+      },
+      success:function(){
+          var classname = $('#uname').val();
+          $("#user_list li").remove('.' + classname)
+          alert("Deleted user!");
+      }
+    });
+  });
+</script>
+
+
+
 </body>
 </html>

@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.views.generic import View
 from django.contrib.auth.models import User, Group
 from django.conf import settings
+from django.http import HttpResponse
 from PIL import Image
 from .forms import  UserForm, ImageUploadForm
 from .models import *
@@ -54,8 +55,6 @@ def add_rule(request):
             return render(request, 'image_annotation/main_page.html',{"image_name" : image_name})
         else:
             return render(request, 'image_annotation/not_authorized.html',{"image_name" : image_name})
-
-
 
 
 def get_image(request):
@@ -122,7 +121,7 @@ def add_user(request):
         username = request.POST['username']
         groups = request.POST['groups']
         password = request.POST['password']
-
+        print(groups)
         usr = User(username=username)
         usr.set_password(password)
         usr.save()
@@ -136,9 +135,7 @@ def add_user(request):
             gr = Group.objects.get(name=group)
             gr.user_set.add(usr)
 
-        groups = list(Group.objects.all())
-        users = list(User.objects.all())
-        return render(request, "image_annotation/superuser.html", {"users":users, "groups":groups})
+        return HttpResponse('')
 
 def add_group(request):
     if request.method == "POST":
@@ -148,9 +145,7 @@ def add_group(request):
         except:
             Group.objects.create(name=groupname)
 
-        groups = list(Group.objects.all())
-        users = list(User.objects.all())
-        return render(request, "image_annotation/superuser.html", {"users":users, "groups":groups})
+        return HttpResponse('')
 
 def del_user(request):
     if request.method == "POST":
@@ -160,9 +155,7 @@ def del_user(request):
         except:
             pass
 
-        groups = list(Group.objects.all())
-        users = list(User.objects.all())
-        return render(request, "image_annotation/superuser.html", {"users":users, "groups":groups})
+        return HttpResponse('')
 
 def del_group(request):
     if request.method == "POST":
@@ -172,9 +165,7 @@ def del_group(request):
         except:
             pass
 
-        groups = list(Group.objects.all())
-        users = list(User.objects.all())
-        return render(request, "image_annotation/superuser.html", {"users":users, "groups":groups})
+        return HttpResponse('')
 
 def get_groups(request):
     if request.method == "POST":
