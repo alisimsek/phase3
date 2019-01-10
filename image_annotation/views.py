@@ -110,10 +110,12 @@ def del_rule(request):
 
 def usergroups(request):
     if request.method == "POST":
+        groups = list(Group.objects.all())
+        users = list(User.objects.all())
         if request.user.is_superuser:
-            return render(request, "image_annotation/superuser.html")
+            return render(request, "image_annotation/superuser.html", {"users":users, "groups":groups})
         else :
-            return render(request, "image_annotation/user_groups.html")
+            return render(request, "image_annotation/user_groups.html", {"users":users, "groups":groups})
 
 def add_user(request):
     if request.method == "POST":
@@ -134,7 +136,9 @@ def add_user(request):
             gr = Group.objects.get(name=group)
             gr.user_set.add(usr)
 
-        return render(request, "image_annotation/superuser.html")
+        groups = list(Group.objects.all())
+        users = list(User.objects.all())
+        return render(request, "image_annotation/superuser.html", {"users":users, "groups":groups})
 
 def add_group(request):
     if request.method == "POST":
@@ -144,7 +148,9 @@ def add_group(request):
         except:
             Group.objects.create(name=groupname)
 
-        return render(request, "image_annotation/superuser.html")
+        groups = list(Group.objects.all())
+        users = list(User.objects.all())
+        return render(request, "image_annotation/superuser.html", {"users":users, "groups":groups})
 
 def del_user(request):
     if request.method == "POST":
@@ -154,7 +160,9 @@ def del_user(request):
         except:
             pass
 
-        return render(request, "image_annotation/superuser.html")
+        groups = list(Group.objects.all())
+        users = list(User.objects.all())
+        return render(request, "image_annotation/superuser.html", {"users":users, "groups":groups})
 
 def del_group(request):
     if request.method == "POST":
@@ -164,7 +172,9 @@ def del_group(request):
         except:
             pass
 
-        return render(request, "image_annotation/superuser.html")
+        groups = list(Group.objects.all())
+        users = list(User.objects.all())
+        return render(request, "image_annotation/superuser.html", {"users":users, "groups":groups})
 
 def get_groups(request):
     if request.method == "POST":
@@ -191,10 +201,12 @@ def set_password(request):
         usr.set_password(password)
         usr.save()
 
+        groups = list(Group.objects.all())
+        users = list(User.objects.all())
         if request.user.is_superuser:
-            return render(request, "image_annotation/superuser.html")
+            return render(request, "image_annotation/superuser.html", {"users":users, "groups":groups})
         else:
-            return render(request, "image_annotation/user_groups.html")
+            return render(request, "image_annotation/user_groups.html", {"users":users, "groups":groups})
 
 def is_member(request):
     if request.method == "POST":

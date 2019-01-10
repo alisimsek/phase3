@@ -1,24 +1,58 @@
-<form action="/main_page" class="inline">
-  <button>Home</button>
-</form>
-<h2>Get Groups</h2>
-<form action = "/get_groups/" method='POST'> {% csrf_token %}
-    Username : <input type="text" name="username" required><br>
-    <input type='submit' value='Get Groups'>
-</form>
-<h2>Get Users</h2>
-<form action = "/get_users/" method='POST'> {% csrf_token %}
-    Groupname : <input type="text" name="groupname" required><br>
-    <input type='submit' value='Get Users'>
-</form>
-<h2>Set Password</h2>
-<form action = "/set_password/" method='POST'> {% csrf_token %}
-    Password :<input type="text" name="password" required><br>
-    <input type='submit' value='Set password'>
-</form>
-<h2>Is Member</h2>
-<form action = "/is_member/" method='POST'> {% csrf_token %}
-    Username : <input type="text" name="username" required><br>
-    Groupname :<input type="text" name="groupname" required><br>
-    <input type='submit' value='Is member'>
-</form>
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        background-color: powderblue;
+      }
+      l1 {
+        position: fixed;
+        left: 500px;
+        top: 0px;
+      }
+      l2 {
+        position: fixed;
+        left: 700px;
+        top: 0px;
+      }
+    </style>
+  </head>
+<body>
+  <l1>
+    <h2>User List</h2>
+    {% for user in users %}
+      <li>{{  user.username  }}</li>
+    {% endfor %}
+  </l1>
+  <l2>
+    <h2>Group List</h2>
+    {% for group in groups %}
+      <li>{{  group.name  }}</li>
+    {% endfor %}
+  </l2>
+  <form action="/main_page" class="inline">
+      <button>Home</button>
+  </form>
+  <h2>Get Groups</h2>
+  <form action = "/get_groups/" method='POST'> {% csrf_token %}
+      Username : <input type="text" name="username" required><br>
+      <input type='submit' value='Get Groups'>
+  </form>
+  <h2>Get Users</h2>
+  <form action = "/get_users/" method='POST'> {% csrf_token %}
+      Groupname : <input type="text" name="groupname" required><br>
+      <input type='submit' value='Get Users'>
+  </form>
+  <h2>Set Password</h2>
+  <form action = "/set_password/" method='POST'> {% csrf_token %}
+      Password :<input type="text" name="password" required><br>
+      <input type='submit' value='Set password'>
+  </form>
+  <h2>Is Member</h2>
+  <form action = "/is_member/" method='POST'> {% csrf_token %}
+      Username : <input type="text" name="username" required><br>
+      Groupname :<input type="text" name="groupname" required><br>
+      <input type='submit' value='Is member'>
+  </form>
+</body>
+</html>
