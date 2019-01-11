@@ -3,12 +3,12 @@ from django.contrib.auth import authenticate, login, logout
 from django.views.generic import View
 from django.contrib.auth.models import User, Group
 from django.conf import settings
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from PIL import Image
 from .forms import  UserForm, ImageUploadForm
 from .models import *
 from .image_list import *
-import ast
+import ast, json
 
 # Create your views here.
 def home_page(request):
@@ -42,17 +42,20 @@ def add_rule(request):
         image_name = request.POST['image_name']
         username = request.POST['username']
         shape = request.POST['shape']
+        shape_pos = request.POST['shape_pos']
         action = request.POST['action']
         rule_pos = request.POST['rule_pos']
-        print(image_name)
+        final_shape = '(\'' + shape + '\',' + shape_pos + ')'
+        print(final_shape)
+        print(action)
         image = LabeledImage.objects.get(name=image_name)
         if request.user.username ==  image.owner.username:
             if type(rule_pos) == str:
-                image.addRule(username, shape, action)
+                rule = image.addRule(username, final_shape, action)
             else:
-                image.addRule(username, shape, action, rule_pos)
+                rule = image.addRule(username, final_shape, action, rule_pos)
             image.save()
-            return render(request, 'image_annotation/main_page.html',{"image_name" : image_name})
+            return JsonResponse(json.dumps(rule), safe=False)
         else:
             return render(request, 'image_annotation/not_authorized.html',{"image_name" : image_name})
 
@@ -61,7 +64,14 @@ def get_image(request):
     if request.method == "POST":
         if request.POST['username'] == request.user.username: # Now user can edit the image, addrules etc.
             image_name = request.POST['image_name']
-            return render(request, 'image_annotation/main_page.html', {"image_name" : image_name})
+            image = LabeledImage.objects.get(name=image_name)
+
+            if image.ruleList == '':
+                rules = []
+            else:
+                rules = ast.literal_eval(image.ruleList)  #Convert string back to list
+
+            return render(request, 'image_annotation/main_page.html', {"image_name" : image_name, "rules":rules})
         else: # Now user only can get the Image
             image_name = request.POST['image_name']
             image = LabeledImage.objects.get(name=image_name)
@@ -100,10 +110,14 @@ def del_rule(request):
         image_name = request.POST['image_name']
         image = LabeledImage.objects.get(name=image_name)
         if request.user.username == image.owner.username:
-            pos = request.POST['rule_pos']
-            image.delRule(pos)
+            rule = ast.literal_eval(request.POST['rule'])
+            rules = ast.literal_eval(image.ruleList)  #Convert string back to list
+            idx = rules.index(rule)
+            image.delRule(idx)
+            del rules[rules.index(rule)]
             image.save()
-            return render(request, 'image_annotation/main_page.html',{"image_name" : image_name})
+            return HttpResponse('')
+            #return render(request, 'image_annotation/main_page.html',{"image_name" : image_name,"rules":rules})
         else:
             return render(request, 'image_annotation/not_authorized.html',{"image_name" : image_name})
 

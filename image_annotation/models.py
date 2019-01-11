@@ -74,6 +74,7 @@ class LabeledImage(models.Model):
             rules.insert(pos, rule)
 
         self.ruleList = str(rules) #Convert list to str
+        return rule
 
 
     def delRule(self,pos):

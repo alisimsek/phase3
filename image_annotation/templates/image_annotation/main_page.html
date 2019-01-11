@@ -1,3 +1,8 @@
+<style>
+  body {
+    background-color: powderblue;
+  }
+</style>
 <h3>Main Page</h3>
 <form action="/main_page" class="inline">
   <button>Home</button>
@@ -5,18 +10,27 @@
 <h2>Load Image</h2>
 <form action="/load_image/" method="POST" enctype="multipart/form-data">{% csrf_token %}
     <p>
-        <input type="hidden" name="image_name" value={{ image_name }}><br>
+        <input type="hidden" name="image_name" value={{ image_name }}>
         <input id="id_image" type="file" class="" name="image" accept="image/*">
     </p>
     <input type="submit" value="Upload" />
 </form>
 <h2>Add Rule</h2>
-<form action = "/add_rule/" method='POST'> {% csrf_token %}
-    <input type="hidden" name="image_name" value={{ image_name }}><br>
-    Username: <input type="text" name="username" required><br>
-    Shape:    <input type="text" name="shape" required><br>
-    Action:   <input type="text" name="action" required><br>
-    Rule Position: <input type="number" step="1" name="rule_pos"><br>
+<form id='add_rule'> {% csrf_token %}
+    <input type="hidden" id='imgname' name="image_name" value={{ image_name }}><br>
+    Username: <input type="text" id='usrname' name="username" required><br>
+    Shape:    <select name="shape" id="shape">
+    <option value="CIRCLE">CIRCLE</option>
+    <option value="RECTANGLE">RECTANGLE</option>
+    <option value="POLYLINE">POLYLINE</option>
+    </select><br/>
+    Shape Position: <input type="text" id="shape_pos" name="shape_pos" required><br>
+    Action:   <select name="action" id="action">
+    <option value="ALLOW">ALLOW</option>
+    <option value="DENY">DENY</option>
+    <option value="BLUR">BLUR</option>
+    </select><br/>
+    Rule Position: <input type="number" id="rule_pos" step="1" name="rule_pos"><br>
     <input type='submit' value='Add Rule'>
 </form>
 <h2>Set default action</h2>
@@ -27,10 +41,14 @@
     <input type='submit' name="action"  value='DENY'><br>
 </form>
 <h2>Del Rule</h2>
-<form action='/del_rule/' method='POST'> {% csrf_token %}
-    <input type="hidden" name="image_name" value={{ image_name }}><br>
-    Rule Position: <input type="number" step="1" name="rule_pos" required><br>
-    <input type='submit' value='Del Rule'>
+<form id="del_rule"> {% csrf_token %}
+    <input type="hidden" id="imname" name="image_name" value={{ image_name }}>
+    <ul id="rule_list">
+      {% for rule in rules %}
+        <li class='{{ rule }}'><input type="radio" class="rule_select" name="rule" value="{{ rule }}">{{ rule }}</li>
+      {% endfor %}
+    </ul>
+    <input type="submit" value='Del Rule'>
 </form>
 <h2>Get Image</h2>
 <form action='/get_owner_image/' method='POST'> {% csrf_token %}
@@ -38,3 +56,53 @@
     <input type="hidden" name="image_name" value={{ image_name }}><br>
     <input type='submit' value='Get Image'>
 </form>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script type="text/javascript">
+  $(document).on('submit','#del_rule', function(e){
+    e.preventDefault();
+
+    var selected_rule = $(".rule_select:checked").val();
+    $.ajax({
+      type:'POST',
+      url:'/del_rule/',
+      data: {
+        image_name:$('#imname').val(),
+        rule:$(".rule_select:checked").val(),
+        csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+      },
+      success:function(){
+          $("#rule_list li").remove(':contains(' + selected_rule + ')')
+          alert("Rule deleted!");
+      }
+    });
+  });
+</script>
+
+<script type="text/javascript">
+  $(document).on('submit','#add_rule', function(e){
+    e.preventDefault();
+
+    var final_rule = '(\'' + $('#usrname').val() + '\', ' + '(\'' + $('#shape option:selected').val() + '\', ' + $('#shape_pos').val() + '), \'' +  $('#action option:selected').val() + '\')';
+    $.ajax({
+      type:'POST',
+      url:'/add_rule/',
+      data: {
+        image_name:$('#imgname').val(),
+        username:$('#usrname').val(),
+        shape:$('#shape option:selected').val(),
+        shape_pos:$('#shape_pos').val(),
+        action:$('#action option:selected').val(),
+        rule_pos:$('#rule_pos').val(),
+        csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+      },
+      success:function(data){
+          data = data.replace(/\[/g ,'(');
+          data = data.replace(/\]/g ,')');
+          data = data.replace(/\"/g, '\'')
+          $("#rule_list").append('<li class=' + data + '><input type=\'radio\' class=\'rule_select\' name=\'rule\' value=\"' + data + '\">' + data + '</li>')
+          alert("Added rule!");
+      }
+    });
+  });
+</script>
