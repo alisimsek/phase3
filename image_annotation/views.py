@@ -4,6 +4,7 @@ from django.views.generic import View
 from django.contrib.auth.models import User, Group
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
+from django.core.files.images import get_image_dimensions
 from PIL import Image
 from .forms import  UserForm, ImageUploadForm
 from .models import *
@@ -32,9 +33,12 @@ def load_image(request):
         if form.is_valid():
             image_name = request.POST['image_name']
             img = LabeledImage.objects.get(name=image_name)
+            img.ruleList = ''
             img.image = form.cleaned_data['image']
             img.save()
-            return render(request, 'image_annotation/main_page.html', {"image_name" : image_name})
+            width, height = get_image_dimensions(img.image.file)
+            response = {"url": '/'+img.image.url, "width":width, "height":height}
+            return JsonResponse(response, safe=False)
 
 
 def add_rule(request):
@@ -46,8 +50,6 @@ def add_rule(request):
         action = request.POST['action']
         rule_pos = request.POST['rule_pos']
         final_shape = '(\'' + shape + '\',' + shape_pos + ')'
-        print(final_shape)
-        print(action)
         image = LabeledImage.objects.get(name=image_name)
         if request.user.username ==  image.owner.username:
             if type(rule_pos) == str:
@@ -71,14 +73,18 @@ def get_image(request):
             else:
                 rules = ast.literal_eval(image.ruleList)  #Convert string back to list
 
-            return render(request, 'image_annotation/main_page.html', {"image_name" : image_name, "rules":rules})
+            url = None
+            if (image.image):
+                url = '/' + image.image.url
+
+            print(url)
+            return render(request, 'image_annotation/main_page.html', {"image_name" : image_name, "rules":rules, "url":url})
         else: # Now user only can get the Image
             image_name = request.POST['image_name']
             image = LabeledImage.objects.get(name=image_name)
             img = image.getImage(request.user.username)
             w, h = img.size
             username = request.user.username
-            print(username)
             img.save(settings.BASE_DIR + settings.STATIC_URL + "images/" + username + ".png")
             #return render(request, 'image_annotation/render_image.html')
             return render(request, 'image_annotation/render_image.html', {"w" : w, "h" : h, "username" : username})
@@ -90,7 +96,6 @@ def get_owner_image(request):
         img = image.getImage(request.user.username)
         w, h = img.size
         username = request.user.username
-        print(username)
         img.save(settings.BASE_DIR + settings.STATIC_URL + "images/" + username + ".png")
         return render(request, 'image_annotation/render_image.html', {"w" : w, "h" : h, "username" : username})
 
@@ -135,7 +140,6 @@ def add_user(request):
         username = request.POST['username']
         groups = request.POST['groups']
         password = request.POST['password']
-        print(groups)
         usr = User(username=username)
         usr.set_password(password)
         usr.save()

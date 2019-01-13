@@ -2,11 +2,26 @@
   body {
     background-color: powderblue;
   }
+  #imagediv {
+    position : fixed;
+    left : 700px;
+    top : 100px;
+  }
+  #image_canvas {
+    position:fixed;
+    left : 699px;
+    top : 99px;
+    z-index:20;
+  }
 </style>
 <h3>Main Page</h3>
 <form action="/main_page" class="inline">
   <button>Home</button>
 </form>
+<div class="image_div" id='imagediv'>
+  <img src={{ url }} id="user_image">
+  <canvas id="image_canvas" width="2000" height="2000"></canvas>
+</div>
 <h2>Load Image</h2>
 <form id="load_image" enctype="multipart/form-data">{% csrf_token %}
     <input id="image_name" type="hidden" name="image_name" value={{ image_name }}>
@@ -62,7 +77,8 @@
     e.preventDefault();
 
     var formData = new FormData();
-    formData.append("image", $('input[type=file]')[0].files[0]);
+    var image = $('input[type=file]')[0].files[0]
+    formData.append("image", image);
     formData.append("image_name", $('#image_name').val());
     formData.append("csrfmiddlewaretoken", $('input[name=csrfmiddlewaretoken]').val());
 
@@ -73,11 +89,27 @@
       cache: false,
       processData: false,
       contentType: false,
-      success:function(){
-          alert("success");
+      success:function(response){
+          var url = response.url
+          var image_width = response.width
+          var image_height = response.height
+          var img = $('#user_image');
+          img.attr('src', url);
+          img.attr('width', image_width);
+          img.attr('height', image_height);
+          $('#image_canvas').attr('width', image_width);
+          $('#image_canvas').attr('height', image_height);
+          $('#image_canvas').attr('style', "border:1px solid black");
+          $('#rule_list li').remove();
+          /*var c = document.getElementById("image_canvas");
+          var ctx = c.getContext("2d");
+          ctx.beginPath();
+          ctx.arc(100, 75, 50, 0, 2 * Math.PI);
+          ctx.stroke();*/
+          alert("Image uploaded successfully");
       },
       error:function(){
-          alert("fail");
+          alert("Failed to upload image");
       }
     });
   });
@@ -130,4 +162,91 @@
       }
     });
   });
+</script>
+
+<script type="text/javascript">
+
+function drawCircle(x1, y1, x2, y2) {
+
+    var radiusX = (x2 - x1) * 0.5,   /// radius for x based on input
+        radiusY = (y2 - y1) * 0.5,   /// radius for y based on input
+        step = 0.01,                 /// resolution of ellipse
+        a = step,                    /// counter
+        pi2 = Math.PI * 2 - step,    /// end angle
+        radius;
+
+    if(x2 - x1 > y2 - y1) {
+      radius = (y2 - y1) * 0.5
+    } else {
+      radius = (x2 - x1) * 0.5
+    }
+
+    var centerX = x1 + radius,
+        centerY = y1 + radius;
+
+
+    /// start a new path
+    ctx.beginPath();
+
+    /// set start point at angle 0
+    ctx.moveTo(centerX + radius * Math.cos(0),
+               centerY + radius * Math.sin(0));
+
+    /// create the ellipse
+    for(; a < pi2; a += step) {
+        ctx.lineTo(centerX + radius * Math.cos(a),
+                   centerY + radius * Math.sin(a));
+    }
+
+
+    /// close it and stroke it for demo
+    ctx.closePath();
+    ctx.strokeStyle = '#000';
+    ctx.stroke();
+}
+
+var canvas = document.getElementById('image_canvas'),
+    ctx = canvas.getContext('2d'),
+    w = canvas.width,
+    h = canvas.height,
+    x1,                 /// start points
+    y1,
+    isDown = false;     /// if mouse button is down
+
+/// handle mouse down
+canvas.onmousedown = function(e) {
+
+    /// get corrected mouse position and store as first point
+    var rect = canvas.getBoundingClientRect();
+    x1 = e.clientX - rect.left;
+    y1 = e.clientY - rect.top;
+    isDown = true;
+}
+
+/// clear isDown flag to stop drawing
+canvas.onmouseup = function() {
+    isDown = false;
+}
+
+/// draw ellipse from start point
+canvas.onmousemove = function(e) {
+
+    if (!isDown) return;
+
+    var rect = canvas.getBoundingClientRect(),
+        x2 = e.clientX - rect.left,
+        y2 = e.clientY - rect.top;
+
+    /// clear canvas
+    ctx.clearRect(0, 0, w, h);
+
+    /// draw ellipse
+    if($('#shape option:selected').val() == 'CIRCLE') {
+      drawCircle(x1, y1, x2, y2);
+    } else if($('#shape option:selected').val() == 'RECTANGLE') {
+      console.log('rectangle');
+    } else {
+      console.log('polyline');
+    }
+}
 </script>
