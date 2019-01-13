@@ -37,7 +37,6 @@
     <option value="RECTANGLE">RECTANGLE</option>
     <option value="POLYLINE">POLYLINE</option>
     </select><br/>
-    Shape Position: <input type="text" id="shape_pos" name="shape_pos" required><br>
     Action:   <select name="action" id="action">
     <option value="ALLOW">ALLOW</option>
     <option value="DENY">DENY</option>
@@ -137,34 +136,8 @@
 </script>
 
 <script type="text/javascript">
-  $(document).on('submit','#add_rule', function(e){
-    e.preventDefault();
 
-    var final_rule = '(\'' + $('#usrname').val() + '\', ' + '(\'' + $('#shape option:selected').val() + '\', ' + $('#shape_pos').val() + '), \'' +  $('#action option:selected').val() + '\')';
-    $.ajax({
-      type:'POST',
-      url:'/add_rule/',
-      data: {
-        image_name:$('#imgname').val(),
-        username:$('#usrname').val(),
-        shape:$('#shape option:selected').val(),
-        shape_pos:$('#shape_pos').val(),
-        action:$('#action option:selected').val(),
-        rule_pos:$('#rule_pos').val(),
-        csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
-      },
-      success:function(data){
-          data = data.replace(/\[/g ,'(');
-          data = data.replace(/\]/g ,')');
-          data = data.replace(/\"/g, '\'')
-          $("#rule_list").append('<li class=' + data + '><input type=\'radio\' class=\'rule_select\' name=\'rule\' value=\"' + data + '\">' + data + '</li>')
-          alert("Added rule!");
-      }
-    });
-  });
-</script>
-
-<script type="text/javascript">
+var centerX, centerY, radius;
 
 function drawCircle(x1, y1, x2, y2) {
 
@@ -172,8 +145,7 @@ function drawCircle(x1, y1, x2, y2) {
         radiusY = (y2 - y1) * 0.5,   /// radius for y based on input
         step = 0.01,                 /// resolution of ellipse
         a = step,                    /// counter
-        pi2 = Math.PI * 2 - step,    /// end angle
-        radius;
+        pi2 = Math.PI * 2 - step;    /// end angle
 
     if(x2 - x1 > y2 - y1) {
       radius = (y2 - y1) * 0.5
@@ -181,14 +153,12 @@ function drawCircle(x1, y1, x2, y2) {
       radius = (x2 - x1) * 0.5
     }
 
-    var centerX = x1 + radius,
-        centerY = y1 + radius;
+    centerX = x1 + radius;
+    centerY = y1 + radius;
 
 
-    /// start a new path
     ctx.beginPath();
 
-    /// set start point at angle 0
     ctx.moveTo(centerX + radius * Math.cos(0),
                centerY + radius * Math.sin(0));
 
@@ -212,6 +182,7 @@ var canvas = document.getElementById('image_canvas'),
     x1,                 /// start points
     y1,
     isDown = false;     /// if mouse button is down
+
 
 /// handle mouse down
 canvas.onmousedown = function(e) {
@@ -249,4 +220,31 @@ canvas.onmousemove = function(e) {
       console.log('polyline');
     }
 }
+
+$(document).on('submit','#add_rule', function(e){
+  e.preventDefault();
+  var pos =  String(Math.floor(Math.abs(centerX))) + ',' + String(Math.floor(Math.abs(centerY))) + ',' + String(Math.floor(Math.abs(radius)));
+
+  $.ajax({
+    type:'POST',
+    url:'/add_rule/',
+    data: {
+      image_name:$('#imgname').val(),
+      username:$('#usrname').val(),
+      shape:$('#shape option:selected').val(),
+      shape_pos: pos,
+      action:$('#action option:selected').val(),
+      rule_pos:$('#rule_pos').val(),
+      csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+    },
+    success:function(data){
+        data = data.replace(/\[/g ,'(');
+        data = data.replace(/\]/g ,')');
+        data = data.replace(/\"/g, '\'')
+        $("#rule_list").append('<li class=' + data + '><input type=\'radio\' class=\'rule_select\' name=\'rule\' value=\"' + data + '\">' + data + '</li>')
+        alert("Added rule!");
+    }
+  });
+});
+
 </script>

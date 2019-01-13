@@ -51,6 +51,7 @@ def add_rule(request):
         rule_pos = request.POST['rule_pos']
         final_shape = '(\'' + shape + '\',' + shape_pos + ')'
         image = LabeledImage.objects.get(name=image_name)
+        print(final_shape)
         if request.user.username ==  image.owner.username:
             if type(rule_pos) == str:
                 rule = image.addRule(username, final_shape, action)
