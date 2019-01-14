@@ -137,7 +137,7 @@
 
 <script type="text/javascript">
 
-var centerX, centerY, radius;
+var pos;
 
 function drawCircle(x1, y1, x2, y2) {
 
@@ -146,6 +146,8 @@ function drawCircle(x1, y1, x2, y2) {
         step = 0.01,                 /// resolution of ellipse
         a = step,                    /// counter
         pi2 = Math.PI * 2 - step;    /// end angle
+
+    var centerX, centerY, radius;
 
     if(x2 - x1 > y2 - y1) {
       radius = (y2 - y1) * 0.5
@@ -168,11 +170,30 @@ function drawCircle(x1, y1, x2, y2) {
                    centerY + radius * Math.sin(a));
     }
 
-
+    pos =  String(Math.floor(Math.abs(centerX))) + ',' + String(Math.floor(Math.abs(centerY))) + ',' + String(Math.floor(Math.abs(radius)));
     /// close it and stroke it for demo
     ctx.closePath();
     ctx.strokeStyle = '#000';
     ctx.stroke();
+}
+
+function drawRectangle(x1, y1, x2, y2) {
+  ctx.beginPath();
+
+  ctx.moveTo(x1, y2);
+  ctx.lineTo(x1 , y1);
+  ctx.moveTo(x2, y1);
+  ctx.lineTo(x1 , y1);
+  ctx.moveTo(x1 , y2);
+  ctx.lineTo(x2,y2);
+  ctx.moveTo(x2,y1);
+  ctx.lineTo(x2,y2);
+
+  pos =  String(Math.floor(Math.abs(x1))) + ',' + String(Math.floor(Math.abs(y1))) + ',' + String(Math.floor(Math.abs(x2))) + ',' + String(Math.floor(Math.abs(y2)));
+
+  ctx.closePath();
+  ctx.strokeStyle = '#000';
+  ctx.stroke();
 }
 
 var canvas = document.getElementById('image_canvas'),
@@ -215,7 +236,7 @@ canvas.onmousemove = function(e) {
     if($('#shape option:selected').val() == 'CIRCLE') {
       drawCircle(x1, y1, x2, y2);
     } else if($('#shape option:selected').val() == 'RECTANGLE') {
-      console.log('rectangle');
+      drawRectangle(x1, y1, x2, y2);
     } else {
       console.log('polyline');
     }
@@ -223,7 +244,6 @@ canvas.onmousemove = function(e) {
 
 $(document).on('submit','#add_rule', function(e){
   e.preventDefault();
-  var pos =  String(Math.floor(Math.abs(centerX))) + ',' + String(Math.floor(Math.abs(centerY))) + ',' + String(Math.floor(Math.abs(radius)));
 
   $.ajax({
     type:'POST',
