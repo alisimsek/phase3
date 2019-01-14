@@ -9,9 +9,12 @@
   }
   #image_canvas {
     position:fixed;
-    left : 699px;
-    top : 99px;
+    left : 700px;
+    top : 100px;
     z-index:20;
+  }
+  #clear_canvas {
+    position: relative;
   }
 </style>
 <h3>Main Page</h3>
@@ -19,8 +22,14 @@
   <button>Home</button>
 </form>
 <div class="image_div" id='imagediv'>
-  <img src={{ url }} id="user_image">
-  <canvas id="image_canvas" width="2000" height="2000"></canvas>
+  {% if url %}
+    <img src={{ url }} id="user_image">
+    <canvas id="image_canvas" width={{ width }} height={{ height }}></canvas></br>
+  {% else %}
+    <img id="user_image">
+    <canvas id="image_canvas"></canvas></br>
+  {% endif %}
+  <input type="button" onclick="clearCanvas()" id="clear_canvas" value="Clear">
 </div>
 <h2>Load Image</h2>
 <form id="load_image" enctype="multipart/form-data">{% csrf_token %}
@@ -46,11 +55,14 @@
     <input type='submit' value='Add Rule'>
 </form>
 <h2>Set default action</h2>
-<form action='/set_default/' method='POST'> {% csrf_token %}
-    <input type="hidden" name="image_name" value={{ image_name }}>
-    <input type='submit' name="action"  value='ALLOW'>
-    <input type='submit' name="action"  value='BLUR'>
-    <input type='submit' name="action"  value='DENY'><br>
+<form id="set_default"> {% csrf_token %}
+    <input type="hidden" id="iname" name="image_name" value={{ image_name }}>
+    Default Action:   <select name="action" id="default_action">
+    <option value="ALLOW">ALLOW</option>
+    <option value="DENY">DENY</option>
+    <option value="BLUR">BLUR</option>
+    </select><br/>
+    <input type='submit' value='Set Default'>
 </form>
 <h2>Del Rule</h2>
 <form id="del_rule"> {% csrf_token %}
@@ -72,46 +84,25 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 <script type="text/javascript">
-  $(document).on('submit','#load_image', function(e){
-    e.preventDefault();
 
-    var formData = new FormData();
-    var image = $('input[type=file]')[0].files[0]
-    formData.append("image", image);
-    formData.append("image_name", $('#image_name').val());
-    formData.append("csrfmiddlewaretoken", $('input[name=csrfmiddlewaretoken]').val());
+$(document).on('submit','#set_default', function(e){
+  e.preventDefault();
 
-    $.ajax({
-      type:'POST',
-      url:'/load_image/',
-      data: formData,
-      cache: false,
-      processData: false,
-      contentType: false,
-      success:function(response){
-          var url = response.url
-          var image_width = response.width
-          var image_height = response.height
-          var img = $('#user_image');
-          img.attr('src', url);
-          img.attr('width', image_width);
-          img.attr('height', image_height);
-          $('#image_canvas').attr('width', image_width);
-          $('#image_canvas').attr('height', image_height);
-          $('#image_canvas').attr('style', "border:1px solid black");
-          $('#rule_list li').remove();
-          /*var c = document.getElementById("image_canvas");
-          var ctx = c.getContext("2d");
-          ctx.beginPath();
-          ctx.arc(100, 75, 50, 0, 2 * Math.PI);
-          ctx.stroke();*/
-          alert("Image uploaded successfully");
-      },
-      error:function(){
-          alert("Failed to upload image");
-      }
-    });
+  var def_act = $('#default_action option:selected').val();
+  $.ajax({
+    type:'POST',
+    url:'/set_default/',
+    data: {
+      image_name:$('#iname').val(),
+      action:def_act,
+      csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+    },
+    success:function(){
+        alert("Default action is set as " + def_act);
+    }
   });
+});
+
 </script>
 
 <script type="text/javascript">
@@ -196,6 +187,16 @@ function drawRectangle(x1, y1, x2, y2) {
   ctx.stroke();
 }
 
+function drawLine(x1, y1, x2, y2) {
+  ctx.beginPath();
+  ctx.moveTo(x1,y1);
+  ctx.lineTo(x2,y2);
+
+  ctx.closePath();
+  ctx.strokeStyle = '#000';
+  ctx.stroke();
+}
+
 var canvas = document.getElementById('image_canvas'),
     ctx = canvas.getContext('2d'),
     w = canvas.width,
@@ -203,8 +204,12 @@ var canvas = document.getElementById('image_canvas'),
     x1,                 /// start points
     y1,
     isDown = false;     /// if mouse button is down
+    polylinePoints = [];
 
-
+function clearCanvas() {
+    ctx.clearRect(0, 0, w, h);
+    polylinePoints = [];
+}
 /// handle mouse down
 canvas.onmousedown = function(e) {
 
@@ -213,37 +218,62 @@ canvas.onmousedown = function(e) {
     x1 = e.clientX - rect.left;
     y1 = e.clientY - rect.top;
     isDown = true;
+
 }
 
 /// clear isDown flag to stop drawing
-canvas.onmouseup = function() {
+canvas.onmouseup = function(e) {
     isDown = false;
+
+    if($('#shape option:selected').val() == 'POLYLINE') {
+      var rect = canvas.getBoundingClientRect(),
+          x2 = e.clientX - rect.left,
+          y2 = e.clientY - rect.top;
+
+      drawLine(x1,y1,x2,y2);
+      polylinePoints.push(x1);
+      polylinePoints.push(y1);
+      console.log(polylinePoints)
+    }
+
 }
 
 /// draw ellipse from start point
 canvas.onmousemove = function(e) {
 
-    if (!isDown) return;
+    if (!isDown) {
+      return;
+    }
 
     var rect = canvas.getBoundingClientRect(),
         x2 = e.clientX - rect.left,
         y2 = e.clientY - rect.top;
 
-    /// clear canvas
-    ctx.clearRect(0, 0, w, h);
-
-    /// draw ellipse
     if($('#shape option:selected').val() == 'CIRCLE') {
+      clearCanvas();
       drawCircle(x1, y1, x2, y2);
     } else if($('#shape option:selected').val() == 'RECTANGLE') {
+      clearCanvas();
       drawRectangle(x1, y1, x2, y2);
-    } else {
-      console.log('polyline');
     }
 }
 
 $(document).on('submit','#add_rule', function(e){
   e.preventDefault();
+  var selected_shape = $('#shape option:selected').val();
+  var selected_action = $('#action option:selected').val();
+
+  if(selected_shape == 'POLYLINE') {
+    if(polylinePoints.length == 0) {
+      return;
+    }
+    pos = "[";
+    for(var i = 0; i < polylinePoints.length - 2; i = i+2) {
+      pos += '(' + polylinePoints[i] + ', ' + polylinePoints[i+1] + '), ';
+    }
+    pos += '(' + polylinePoints[i] + ', ' + polylinePoints[i+1] + ')]';
+    polylinePoints = [];
+  }
 
   $.ajax({
     type:'POST',
@@ -251,18 +281,61 @@ $(document).on('submit','#add_rule', function(e){
     data: {
       image_name:$('#imgname').val(),
       username:$('#usrname').val(),
-      shape:$('#shape option:selected').val(),
+      shape: selected_shape,
       shape_pos: pos,
-      action:$('#action option:selected').val(),
+      action: selected_action,
       rule_pos:$('#rule_pos').val(),
       csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
     },
     success:function(data){
-        data = data.replace(/\[/g ,'(');
-        data = data.replace(/\]/g ,')');
-        data = data.replace(/\"/g, '\'')
-        $("#rule_list").append('<li class=' + data + '><input type=\'radio\' class=\'rule_select\' name=\'rule\' value=\"' + data + '\">' + data + '</li>')
-        alert("Added rule!");
+        if(selected_shape == 'POLYLINE') {
+          var final_shape = '(\'' + selected_shape + '\', ' + pos + ')'; // ("POLYLINE", [(25, 25), (25, 50), (50, 50)])
+          var final_rule = '(\'' + $('#usrname').val() + '\', ' + final_shape + ', \'' + selected_action + '\')';   // ("ali",("POLYLINE",[(25,25),(25,50),(50,50)]),"DENY")
+          $("#rule_list").append('<li class=' + final_rule + '><input type=\'radio\' class=\'rule_select\' name=\'rule\' value=\"' + final_rule + '\">' + final_rule + '</li>')
+        } else {
+          data = data.replace(/\[/g ,'(');
+          data = data.replace(/\]/g ,')');
+          data = data.replace(/\"/g, '\'')
+          $("#rule_list").append('<li class=' + data + '><input type=\'radio\' class=\'rule_select\' name=\'rule\' value=\"' + data + '\">' + data + '</li>')
+        }
+        alert("Rule added!");
+    }
+  });
+});
+
+$(document).on('submit','#load_image', function(e){
+  e.preventDefault();
+
+  var formData = new FormData();
+  var image = $('input[type=file]')[0].files[0]
+  formData.append("image", image);
+  formData.append("image_name", $('#image_name').val());
+  formData.append("csrfmiddlewaretoken", $('input[name=csrfmiddlewaretoken]').val());
+
+  $.ajax({
+    type:'POST',
+    url:'/load_image/',
+    data: formData,
+    cache: false,
+    processData: false,
+    contentType: false,
+    success:function(response){
+        var url = response.url
+        var image_width = response.width
+        var image_height = response.height
+        var img = $('#user_image');
+        img.attr('src', url);
+        img.attr('width', image_width);
+        img.attr('height', image_height);
+        $('#image_canvas').attr('width', image_width);
+        $('#image_canvas').attr('height', image_height);
+        $('#rule_list li').remove();
+        w = image_width;
+        h = image_height;
+        alert("Image uploaded successfully");
+    },
+    error:function(){
+        alert("Failed to upload image");
     }
   });
 });

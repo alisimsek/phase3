@@ -25,7 +25,8 @@ def create_image(request):
         defaultAction = "ALLOW"
         image = LabeledImage(name=image_name,owner=request.user,action=defaultAction)
         image.save()
-        return render(request, 'image_annotation/main_page.html', {"image_name" : image_name})
+        rules = []
+        return render(request, 'image_annotation/main_page.html', {"image_name" : image_name, "rules":rules})
 
 def load_image(request):
     if request.method == 'POST':
@@ -51,12 +52,11 @@ def add_rule(request):
         rule_pos = request.POST['rule_pos']
         final_shape = '(\'' + shape + '\',' + shape_pos + ')'
         image = LabeledImage.objects.get(name=image_name)
-        print(final_shape)
         if request.user.username ==  image.owner.username:
-            if type(rule_pos) == str:
+            if rule_pos == "":
                 rule = image.addRule(username, final_shape, action)
             else:
-                rule = image.addRule(username, final_shape, action, rule_pos)
+                rule = image.addRule(username, final_shape, action, int(rule_pos))
             image.save()
             return JsonResponse(json.dumps(rule), safe=False)
         else:
@@ -74,12 +74,13 @@ def get_image(request):
             else:
                 rules = ast.literal_eval(image.ruleList)  #Convert string back to list
 
-            url = None
             if (image.image):
                 url = '/' + image.image.url
+                width, height = get_image_dimensions(image.image.file)
+                return render(request, 'image_annotation/main_page.html', {"image_name" : image_name, "rules":rules, "url":url, "width":width, "height":height})
+            else:
+                return render(request, 'image_annotation/main_page.html', {"image_name" : image_name, "rules":rules})
 
-            print(url)
-            return render(request, 'image_annotation/main_page.html', {"image_name" : image_name, "rules":rules, "url":url})
         else: # Now user only can get the Image
             image_name = request.POST['image_name']
             image = LabeledImage.objects.get(name=image_name)
@@ -107,7 +108,7 @@ def set_default(request):
         if request.user.username == image.owner.username:
             image.action = request.POST['action']
             image.save()
-            return render(request, 'image_annotation/main_page.html',{"image_name" : image_name})
+            return HttpResponse('')
         else:
             return render(request, 'image_annotation/not_authorized.html',{"image_name" : image_name})
 
